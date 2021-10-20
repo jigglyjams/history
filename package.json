@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "dependencies": {
+    "dayjs": "^1.10.7",
+    "mongodb": "^4.1.3"
+  }
+}
