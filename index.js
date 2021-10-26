@@ -31,6 +31,8 @@ async function main() {
   await getImage(tokenId);
   const txnHash = results[0].get('transaction_hash');
   document.getElementById("val").textContent = await getTransactionVal(txnHash);
+  document.getElementById("os").href = `https://opensea.io/assets/0x31d4da52c12542ac3d6aadba5ed26a3a563a86dc/${tokenId}`;
+  document.getElementById("etherscan").href = `https://etherscan.com/tx/${txnHash}`;
 }
 
 main()
