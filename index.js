@@ -1,37 +1,36 @@
-import { MongoClient } from 'mongodb'
-import dayjs from 'dayjs';
+const serverUrl = 'https://ysfwsudhbf9r.usemoralis.com:2053/server';
+const appId = "EbhJouPTp4Hj6edmmNkBxYBbceoh1WC6XWzyZBtJ";
 
-var col;
+Moralis.start({ serverUrl, appId });
 
-async function connectDB() {
-  const client = new MongoClient("mongodb://143.198.132.54:56728/");
-  await client.connect();
-  col = client.db('parse').collection('FlyFrogs');
+const web3 = new Web3("https://speedy-nodes-nyc.moralis.io/ecb9b1fb67d679e74a8cf95c/eth/mainnet");
+
+const ipfsBase = 'https://ipfs.moralis.io:2053/ipfs';
+const decimal = 18;
+
+async function getTransactionVal(txn) {
+  return web3.eth.getTransaction(txn).then( v => {
+    return parseInt(v.value)/(10**decimal)
+  });
 }
 
-async function getTokenHistory(id) {
-  const results = await col.find({'tokenId': id}).project(
-    {'_id': 0, _created_at: 0, _updated_at: 0, log_index:0}
-    ).sort({
-      'block_timestamp' : -1}).toArray();
-  return(results);
+async function getImage(tokenId) {
+  const imageURL = await axios.get(`${ipfsBase}/QmRdNB3Q6Q5gVWnduBmxNZb4p9zKFmM3Qx3tohBb8B2KRK/${tokenId}`).then( r => {
+    return `${ipfsBase}/${r.data.image.split('ipfs://')[1]}`;
+  });
+  document.getElementById("frog").src = imageURL;
 }
 
-function getHolderTimes(history) {
-  if (history.length > 0){
-    var wallet_time = [];
-    for (let i = 1; i < history.length; i++) {
-      const timedelta = dayjs(history[i-1].block_timestamp.iso) - dayjs(history[i].block_timestamp.iso);
-      wallet_time.push([history[i-1].to, timedelta]);
-    }
-    wallet_time.push([history[history.length-1].to,dayjs() - history[history.length-1].block_timestamp.iso]);
-    console.log(wallet_time);
-  }
+async function main() {
+  const FlyFrogs = Moralis.Object.extend("FlyFrogs");
+  const query = new Moralis.Query(FlyFrogs);
+  query.limit(1);
+  query.descending("block_timestamp");
+  const results = await query.find();
+  const tokenId = results[0].get('tokenId');
+  await getImage(tokenId);
+  const txnHash = results[0].get('transaction_hash');
+  document.getElementById("val").textContent = await getTransactionVal(txnHash);
 }
 
-await connectDB();
-for (let x = 1; x < 10000; x++){
-  console.log(x);
-  getHolderTimes(await getTokenHistory(x.toString()));
-}
-client.close();
+main()
