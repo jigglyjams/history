@@ -1,5 +1,5 @@
-const serverUrl = 'https://ysfwsudhbf9r.usemoralis.com:2053/server';
-const appId = "EbhJouPTp4Hj6edmmNkBxYBbceoh1WC6XWzyZBtJ";
+const serverUrl = 'https://r6gi5vqsvg2u.usemoralis.com:2053/server';
+const appId = "OY4N9G9YBp14WDk6v8udiQrS7xc21mECJ6Weu4mf";
 
 Moralis.start({ serverUrl, appId });
 
@@ -30,6 +30,9 @@ async function main() {
   const tokenId = results[0].get('tokenId');
   await getImage(tokenId);
   const txnHash = results[0].get('transaction_hash');
+  const block_timestamp = results[0].get('block_timestamp');
+  document.getElementById("time").textContent = block_timestamp;
+  document.getElementById("tokenId").textContent = tokenId;
   document.getElementById("val").textContent = await getTransactionVal(txnHash);
   document.getElementById("os").href = `https://opensea.io/assets/0x31d4da52c12542ac3d6aadba5ed26a3a563a86dc/${tokenId}`;
   document.getElementById("etherscan").href = `https://etherscan.com/tx/${txnHash}`;
